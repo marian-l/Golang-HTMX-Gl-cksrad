@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Glücksrad</title>
+    <script src="https://unpkg.com/htmx.org"></script>
+</head>
+<body>
+    <h1>Willkommen zum Filmeabend!</h1>
+    <div id="film-selektion">
+        <button hx-patch="/filmselektion"
+            hx-trigger="click"
+            hx-target="#film-selektion"
+            hx-swap="outerHTML">
+            Filme eintragen
+        </button>
+    </div>
+
+
+</body>
+</html>
