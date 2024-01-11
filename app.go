@@ -50,9 +50,6 @@ func selectMoviesDB() (movieList []string) {
 	rows, err := db.Query(query)
 
 	defer rows.Close()
-	if err != nil {
-		log.Fatal(err)
-	}
 
 	alleFilme := []string{}
 
@@ -136,7 +133,7 @@ func processRequest(clone *http.Request) []string {
 	alleFilme := strings.SplitN(tmp2, "\n", -1)
 	fmt.Println(alleFilme)
 
-	for index, _ := range alleFilme {
+	for index := range alleFilme {
 		alleFilme[index] = string(alleFilme[index])
 
 		if strings.HasPrefix(alleFilme[index], " ") {
@@ -181,8 +178,8 @@ func filmSelektionHandler(w http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	template := template.Must(template.ParseFiles("C:\\Users\\maria\\GolandProjects\\awesomeProject\\routes\\filmselektion.html"))
-	err := template.Execute(w, nil)
+	templ := template.Must(template.ParseFiles("C:\\Users\\maria\\GolandProjects\\awesomeProject\\routes\\filmselektion.html"))
+	err := templ.Execute(w, nil)
 	if err != nil {
 		log.Fatal(err)
 	}
