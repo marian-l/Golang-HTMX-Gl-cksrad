@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"github.com/angelofallars/htmx-go"
 	"html/template"
@@ -25,35 +26,27 @@ func main() {
 		requestClone := r.Clone(ctx) // we need a context here
 
 		// read cloned request // byte array b
+		// request.Body.src.R.buf -> []uint8 => string
 		b, _ := io.ReadAll(requestClone.Body)
 
-		// alternative body cloning i found
-		// seems bugged or sth
-		body, err := r.GetBody()
-		if err != nil {
-			return
-		}
+		tmp := strings.Split(string(b), "=")
 
-		defer body.Close()
-		buf := make([]byte, len(b))
-		n, err := body.Read(buf)
+		tmp2 := tmp[1]
 
-		fmt.Printf("%s\n", buf[:n])
+		tmp2 = strings.ReplaceAll(tmp2, "%5Cn", "\n")
+		tmp2 = strings.ReplaceAll(tmp2, "%20", " ")
+		tmp2 = strings.ReplaceAll(tmp2, "%3F", "?")
+		tmp2 = strings.ReplaceAll(tmp2, "%2C", ",")
 
-		// copy the byte array from the request somewhere
+		alleFilme := strings.SplitN(tmp2, "\n", -1)
 
-		// body := b
+		// write alleFilme to database
+		const database string = "movies.sqlite"
+		db, err := sql.Open("sqlite3", database)
 
-		// body = string(body)
-
-		alleFilme := strings.Split(string(b), "=")
-
-		alleFilme = strings.SplitN(alleFilme[1], "%5Cn", -1)
-		fmt.Println(alleFilme)
-
-		// currently there is no newline character inside the list
-		// reading the bytes from the body, we probably need a better string conversion.
-
+		const createTable string = `CREATE TABLE IF NOT EXISTS movies (
+									id INTEGER NOT NULL PRIMARY KEY,
+									name TEXT NOT NULL );`
 	}
 
 	multiplexer := http.NewServeMux()
