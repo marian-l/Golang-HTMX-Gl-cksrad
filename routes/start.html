@@ -17,8 +17,10 @@
     </div>
 
     <div id="film-liste">
+        {{ range := filmliste }}
+        {{ . }}
+        {{ end }}
         <ul>
-            hier dynamisch die filme auflisten.
         </ul>
     </div>
 
