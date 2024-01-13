@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<ul>
+    {{if .Filme }}
+        {{ range .Filme }}
+
+            <li class="list-item list-inline-item">{{ . }}</li>
+
+        {{ end }}
+    {{else}}
+
+        Keine Daten aus Datenbank gefunden
+
+    {{end}}
+</ul>
+
+</html>

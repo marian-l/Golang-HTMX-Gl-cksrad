@@ -14,10 +14,15 @@ import (
 	"strings"
 )
 
+// Globals
 var db, _ = Connect()
-var (
-	name string
-)
+var name string
+var alleFilme = selectMoviesDB()
+
+// struct for rendering
+type Filmliste struct {
+	Filme []string
+}
 
 func main() {
 	setupLogging()
@@ -27,6 +32,8 @@ func main() {
 	multiplexer.HandleFunc("/glücksrad", startPageHandler)
 	multiplexer.HandleFunc("/filmselektion", filmSelektionHandler)
 	multiplexer.HandleFunc("/validierung", validierungsHandler)
+	multiplexer.HandleFunc("/filmabfrage", filmabfrageHandler)
+	multiplexer.HandleFunc("/zufallsauswahl", zufallsauswahlHandler)
 
 	// setup server
 	err := http.ListenAndServe(":8080", multiplexer)
@@ -35,9 +42,32 @@ func main() {
 	}
 }
 
+func zufallsauswahlHandler(w http.ResponseWriter, r *http.Request) {
+	// create new context for cloned request
+	ctx := context.WithValue(context.Background(), "key", "value")
+
+	// clone request to access it freely
+	clone := r.Clone(ctx) // we need a context here
+
+	b, err := io.ReadAll(clone.Body)
+	if err != nil {
+		log.Fatalf("error: %s", err)
+	}
+
+	tmp := strings.Split(string(b), "=")
+}
+
+func filmabfrageHandler(w http.ResponseWriter, r *http.Request) {
+	templ := template.Must(template.ParseFiles("C:\\Users\\maria\\GolandProjects\\awesomeProject\\routes\\filmliste.html"))
+	err := templ.Execute(w, alleFilme)
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
 func setupLogging() {
 	// setup logging
-	file, err := os.OpenFile("errorLog.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
+	file, err := os.OpenFile("./logs/errorLog.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -115,7 +145,7 @@ func writeToDatabase(filme []string) {
 	}
 }
 
-func processRequest(clone *http.Request) []string {
+func processRequestForMovies(clone *http.Request) []string {
 	b, err := io.ReadAll(clone.Body)
 	if err != nil {
 		log.Fatalf("error: %s", err)
@@ -167,7 +197,7 @@ func validierungsHandler(w http.ResponseWriter, r *http.Request) {
 	// clone request to access it freely
 	requestClone := r.Clone(ctx) // we need a context here
 
-	alleFilme := processRequest(requestClone)
+	alleFilme := processRequestForMovies(requestClone)
 
 	writeToDatabase(alleFilme)
 }

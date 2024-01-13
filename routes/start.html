@@ -4,26 +4,52 @@
     <meta charset="UTF-8">
     <title>Glücksrad</title>
     <script src="https://unpkg.com/htmx.org"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
-    <h1>Willkommen zum Filmeabend!</h1>
-    <div id="film-selektion">
-        <button hx-patch="/filmselektion"
-            hx-trigger="click"
-            hx-target="#film-selektion"
-            hx-swap="outerHTML">
-            Filme eintragen
-        </button>
-    </div>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-2">
+            <div id="film-selektion">
+                <button hx-patch="/filmselektion"
+                        hx-trigger="click"
+                        hx-target="#film-selektion"
+                        hx-swap="outerHTML">
+                    Filme eintragen
+                </button>
+            </div>
+        </div>
+        <div class="col-md-10">
+            <h1>Willkommen zum Filmeabend!</h1>
 
-    <div id="film-liste">
-        {{ range := filmliste }}
-        {{ . }}
-        {{ end }}
-        <ul>
-        </ul>
+            <div id="film-liste" hx-get="/filmabfrage" hx-swap="innerHTML" hx-target="this" hx-trigger="every 10s, delay:2s">
+
+            </div>
+
+            <div class="card">
+                <h5 class="card-header">
+                    Made By
+                </h5>
+                <div class="card-body">
+                    <p class="card-text">
+                        Mary
+                    </p>
+                </div>
+                <div class="card-footer">
+                    Nice.
+                </div>
+            </div>
+        </div>
     </div>
+</div>
+
+
+
+
 
 
 </body>
 </html>
+
+
+
