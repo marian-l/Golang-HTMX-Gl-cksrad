@@ -24,12 +24,12 @@ var name string
 var filmListe = selectMoviesDB()
 var filmArray []string
 
-var zufallsfaktorStrukturfeld Zufallsstruktur
-var zufallsfaktorInteger int = 1
+var zufallsStruktur Zufallsstruktur
+var zufallsInteger int = 1
 
 // Strukturen zur Übergabe an HTMX
 type Zufallsstruktur struct {
-	zufallsfeld int
+	Zufallsfeld int
 }
 
 type Filmliste struct {
@@ -56,10 +56,16 @@ func main() {
 }
 
 func kalkulationsHandler(w http.ResponseWriter, r *http.Request) {
-	ergebnis := zufallsfaktorInteger % len(filmArray)
+	type Ergebnis struct {
+		ErgebnisFeld string
+	}
+
+	ergebnis := Ergebnis{
+		ErgebnisFeld: filmArray[zufallsInteger%len(filmArray)],
+	}
 
 	templ := template.Must(template.ParseFiles("C:\\Users\\maria\\GolandProjects\\awesomeProject\\routes\\ergebnis.html"))
-	err := templ.Execute(w, filmArray[ergebnis])
+	err := templ.Execute(w, ergebnis)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -82,13 +88,13 @@ func zufallsauswahlHandler(w http.ResponseWriter, r *http.Request) {
 	if len(tmp) >= 2 {
 		tmpInt, err := strconv.Atoi(tmp[1])
 
-		zufallsfaktorInteger *= tmpInt
+		zufallsInteger *= tmpInt
 
 		templ := template.Must(template.ParseFiles("C:\\Users\\maria\\GolandProjects\\awesomeProject\\routes\\zufallsfaktor.html"))
 
-		zufallsfaktorStrukturfeld.zufallsfeld = zufallsfaktorInteger
+		zufallsStruktur.Zufallsfeld = zufallsInteger
 
-		err = templ.Execute(w, zufallsfaktorStrukturfeld.zufallsfeld)
+		err = templ.Execute(w, zufallsStruktur)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -105,7 +111,7 @@ func zufallsauswahlHandler(w http.ResponseWriter, r *http.Request) {
 
 func filmabfrageHandler(w http.ResponseWriter, r *http.Request) {
 	templ := template.Must(template.ParseFiles("C:\\Users\\maria\\GolandProjects\\awesomeProject\\routes\\filmliste.html"))
-	err := templ.Execute(w, filmListe.Filme)
+	err := templ.Execute(w, filmListe)
 	if err != nil {
 		log.Fatal(err)
 	}
