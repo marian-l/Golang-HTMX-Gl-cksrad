@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+
+{{ if .Faktor }}
+
+<p> {{ .Faktor }} </p>
+
+{{ end }}
+
+<form hx-post="/zufallsfaktor">
+    <label for="zufallsfaktor-input">Hier Zufallsfaktoren einlesen</label>
+    <input id="zufallsfaktor-input" name="zufallsfaktor-input" type="text">
+</form>
+
+{{ if .Faktor lt 1 }}
+
+    <button
+        hx-get="/filmkalkulation"
+        hx-swap="innerHTML"
+        hx-target="#filmauswahl-ergebnis"
+        hx-trigger="click"
+    >
+        Film berechnen?
+    </button>
+
+<iframe src="https://giphy.com/embed/e06Wc1bfzPQXnXyhLW" width="480" height="480" class="giphy-embed" allowFullScreen>
+</iframe><p><a href="https://giphy.com/gifs/SVT-david-sundin-bst-i-test-e06Wc1bfzPQXnXyhLW">via GIPHY</a></p>
+
+<div id="filmauswahl-ergebnis">
+
+</div>
+
+{{ end }}

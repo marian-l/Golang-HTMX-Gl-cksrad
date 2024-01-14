@@ -18,6 +18,15 @@
                     Filme eintragen
                 </button>
             </div>
+            <div id="zufallsauswahl">
+                <button
+                        hx-trigger="click"
+                        hx-target="this"
+                        hx-swap="outerHTML"
+                        hx-get="/zufallsfaktor">
+                    Filmauswahl?
+                </button>
+            </div>
         </div>
         <div class="col-md-10">
             <h1>Willkommen zum Filmeabend!</h1>
@@ -42,11 +51,6 @@
         </div>
     </div>
 </div>
-
-
-
-
-
 
 </body>
 </html>

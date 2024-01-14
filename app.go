@@ -17,11 +17,21 @@ import (
 
 // Globals
 var db, _ = Connect()
-var name string
-var alleFilme = selectMoviesDB()
-var zufallsfaktor int = 1
 
-// struct for rendering
+// für Select-Abfrage
+var name string
+
+var filmListe = selectMoviesDB()
+var filmArray []string
+
+var zufallsfaktorStrukturfeld Zufallsstruktur
+var zufallsfaktorInteger int = 1
+
+// Strukturen zur Übergabe an HTMX
+type Zufallsstruktur struct {
+	zufallsfeld int
+}
+
 type Filmliste struct {
 	Filme []string
 }
@@ -46,10 +56,10 @@ func main() {
 }
 
 func kalkulationsHandler(w http.ResponseWriter, r *http.Request) {
-	ergebnis := zufallsfaktor % len(alleFilme)
+	ergebnis := zufallsfaktorInteger % len(filmArray)
 
 	templ := template.Must(template.ParseFiles("C:\\Users\\maria\\GolandProjects\\awesomeProject\\routes\\ergebnis.html"))
-	err := templ.Execute(w, alleFilme[ergebnis])
+	err := templ.Execute(w, filmArray[ergebnis])
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -72,10 +82,13 @@ func zufallsauswahlHandler(w http.ResponseWriter, r *http.Request) {
 	if len(tmp) >= 2 {
 		tmpInt, err := strconv.Atoi(tmp[1])
 
-		zufallsfaktor *= tmpInt
+		zufallsfaktorInteger *= tmpInt
 
 		templ := template.Must(template.ParseFiles("C:\\Users\\maria\\GolandProjects\\awesomeProject\\routes\\zufallsfaktor.html"))
-		err = templ.Execute(w, zufallsfaktor)
+
+		zufallsfaktorStrukturfeld.zufallsfeld = zufallsfaktorInteger
+
+		err = templ.Execute(w, zufallsfaktorStrukturfeld.zufallsfeld)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -92,7 +105,7 @@ func zufallsauswahlHandler(w http.ResponseWriter, r *http.Request) {
 
 func filmabfrageHandler(w http.ResponseWriter, r *http.Request) {
 	templ := template.Must(template.ParseFiles("C:\\Users\\maria\\GolandProjects\\awesomeProject\\routes\\filmliste.html"))
-	err := templ.Execute(w, alleFilme)
+	err := templ.Execute(w, filmListe.Filme)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -107,14 +120,14 @@ func setupLogging() {
 	log.SetOutput(file)
 }
 
-func selectMoviesDB() (movieList []string) {
+func selectMoviesDB() (movieList Filmliste) {
 	// get movie list
 	query := "SELECT movies.name from main.movies;"
 	rows, err := db.Query(query)
 
 	defer rows.Close()
 
-	alleFilme := []string{}
+	dbFilme := []string{}
 
 	for rows.Next() {
 		err := rows.Scan(&name)
@@ -123,14 +136,20 @@ func selectMoviesDB() (movieList []string) {
 		}
 
 		err = rows.Err()
-		alleFilme = append(alleFilme, name)
+		dbFilme = append(dbFilme, name)
 	}
 
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	return alleFilme
+	// das String-Array kopieren für String Methoden
+	filmArray = dbFilme
+
+	// eigene Struktur zur Parameterübergabe an HTMX benutzen
+	filmListe := Filmliste{dbFilme}
+
+	return filmListe
 }
 
 func Connect() (*sql.DB, error) {
