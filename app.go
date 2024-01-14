@@ -11,6 +11,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 )
 
@@ -18,6 +19,7 @@ import (
 var db, _ = Connect()
 var name string
 var alleFilme = selectMoviesDB()
+var zufallsfaktor int = 1
 
 // struct for rendering
 type Filmliste struct {
@@ -30,13 +32,24 @@ func main() {
 	// setup server routes
 	multiplexer := http.NewServeMux()
 	multiplexer.HandleFunc("/glücksrad", startPageHandler)
-	multiplexer.HandleFunc("/filmselektion", filmSelektionHandler)
+	multiplexer.HandleFunc("/filmselektion", filmEingabeHandler)
 	multiplexer.HandleFunc("/validierung", validierungsHandler)
 	multiplexer.HandleFunc("/filmabfrage", filmabfrageHandler)
-	multiplexer.HandleFunc("/zufallsauswahl", zufallsauswahlHandler)
+	multiplexer.HandleFunc("/zufallsfaktor", zufallsauswahlHandler)
+	multiplexer.HandleFunc("/filmkalkulation", kalkulationsHandler)
 
 	// setup server
 	err := http.ListenAndServe(":8080", multiplexer)
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
+func kalkulationsHandler(w http.ResponseWriter, r *http.Request) {
+	ergebnis := zufallsfaktor % len(alleFilme)
+
+	templ := template.Must(template.ParseFiles("C:\\Users\\maria\\GolandProjects\\awesomeProject\\routes\\ergebnis.html"))
+	err := templ.Execute(w, alleFilme[ergebnis])
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -55,6 +68,26 @@ func zufallsauswahlHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	tmp := strings.Split(string(b), "=")
+
+	if len(tmp) >= 2 {
+		tmpInt, err := strconv.Atoi(tmp[1])
+
+		zufallsfaktor *= tmpInt
+
+		templ := template.Must(template.ParseFiles("C:\\Users\\maria\\GolandProjects\\awesomeProject\\routes\\zufallsfaktor.html"))
+		err = templ.Execute(w, zufallsfaktor)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+	} else {
+		templ := template.Must(template.ParseFiles("C:\\Users\\maria\\GolandProjects\\awesomeProject\\routes\\zufallsfaktor.html"))
+		err = templ.Execute(w, nil)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+
 }
 
 func filmabfrageHandler(w http.ResponseWriter, r *http.Request) {
@@ -202,13 +235,13 @@ func validierungsHandler(w http.ResponseWriter, r *http.Request) {
 	writeToDatabase(alleFilme)
 }
 
-func filmSelektionHandler(w http.ResponseWriter, request *http.Request) {
+func filmEingabeHandler(w http.ResponseWriter, request *http.Request) {
 	if !htmx.IsHTMX(request) {
 		fmt.Fprintf(w, "keine HTMX-Anfrage, kein Content!")
 		return
 	}
 
-	templ := template.Must(template.ParseFiles("C:\\Users\\maria\\GolandProjects\\awesomeProject\\routes\\filmselektion.html"))
+	templ := template.Must(template.ParseFiles("C:\\Users\\maria\\GolandProjects\\awesomeProject\\routes\\filmeingabe.html"))
 	err := templ.Execute(w, nil)
 	if err != nil {
 		log.Fatal(err)
